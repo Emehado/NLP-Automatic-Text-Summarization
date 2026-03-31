@@ -1480,7 +1480,7 @@
 
           <div class="step-nav">
             <div></div>
-            <button class="btn btn-primary" onclick="goTo(1)">
+            <button class="btn btn-primary" onclick="continueToStep(1)">
               Continue to Preprocessing
               <svg
                 viewBox="0 0 24 24"
@@ -1590,27 +1590,13 @@
                   </div>
                 </div>
                 <div style="margin-top: 12px">
-                  <button
-                    class="btn btn-secondary"
-                    style="width: 100%; justify-content: center"
-                    onclick="importFromStep1()"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      style="width: 14px; height: 14px"
-                    >
-                      <polyline points="17 1 21 5 17 9" />
-                      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                      <polyline points="7 23 3 19 7 15" />
-                      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                    </svg>
-                    Use Extracted Text
-                  </button>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 14px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);">
+                    <input type="checkbox" id="use-step1-checkbox" checked onchange="toggleStep1Import()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);" />
+                    <div>
+                      <div style="font-size:13px;font-weight:500;">Use extracted text from Step 1</div>
+                      <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;" id="step1-import-meta">No text extracted yet</div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -1739,7 +1725,7 @@
               </svg>
               Back
             </button>
-            <button class="btn btn-primary" onclick="goTo(2)">
+            <button class="btn btn-primary" onclick="continueToStep(2)">
               Continue to Summarization
               <svg
                 viewBox="0 0 24 24"
@@ -1885,7 +1871,7 @@
               </svg>
               Back
             </button>
-            <button class="btn btn-primary" onclick="goTo(3)">
+            <button class="btn btn-primary" onclick="continueToStep(3)">
               View Insights
               <svg
                 viewBox="0 0 24 24"
@@ -2272,6 +2258,12 @@
         state.currentStep = step;
         window.scrollTo({ top: 0, behavior: "smooth" });
 
+        // When arriving at Step 2, auto-import text and refresh checkbox meta
+        if (step === 1) {
+          updateStep1ImportMeta();
+          toggleStep1Import();
+        }
+
         // Animate bars on insights page
         if (step === 3) {
           setTimeout(animateBars, 400);
@@ -2386,6 +2378,7 @@
             "inline-flex";
           document.getElementById("step1-status").innerHTML =
             '<div class="status-dot active"></div> Complete';
+          updateStep1ImportMeta();
           showNotification("Text extracted successfully");
         } catch (err) {
           document.getElementById("step1-status").innerHTML =
@@ -2406,13 +2399,40 @@
         a.click();
       }
 
-      // ── PREPROCESSING ──
-      function importFromStep1() {
-        if (!state.extractedText) {
-          showNotification("No extracted text found. Run Step 1 first.");
+      // ── STEP VALIDATION ──
+      const STEP_GUARDS = [
+        () => !!state.extractedText  || "Extract text from a PDF in Step 1 first.",
+        () => !!state.sections.length || "Run preprocessing in Step 2 first.",
+        () => !!state.summaries.length || "Generate a summary in Step 3 first.",
+      ];
+
+      function continueToStep(to) {
+        const guard = STEP_GUARDS[to - 1];
+        const result = guard();
+        if (result !== true) {
+          showNotification(result);
           return;
         }
-        showNotification("Text imported from Step 1");
+        goTo(to);
+      }
+
+      // ── PREPROCESSING ──
+      function updateStep1ImportMeta() {
+        const meta = document.getElementById("step1-import-meta");
+        if (!meta) return;
+        if (state.extractedText) {
+          const words = state.extractedText.trim().split(/\s+/).length;
+          meta.textContent = `${words.toLocaleString()} words ready to import`;
+        } else {
+          meta.textContent = "No text extracted yet";
+        }
+      }
+
+      function toggleStep1Import() {
+        const checked = document.getElementById("use-step1-checkbox").checked;
+        const zone    = document.getElementById("upload-zone-2");
+        zone.style.opacity = checked ? "0.4" : "1";
+        zone.style.pointerEvents = checked ? "none" : "auto";
       }
 
       function toggleBtn(id) {
@@ -2420,7 +2440,8 @@
       }
 
       async function runPreprocessing() {
-        const text = state.extractedText;
+        const useStep1 = document.getElementById("use-step1-checkbox").checked;
+        const text = useStep1 ? state.extractedText : state.extractedText;
         if (!text) {
           showNotification("No text available. Complete Step 1 first.");
           return;
@@ -2433,10 +2454,7 @@
           lowercase: document
             .getElementById("toggle-lower")
             .classList.contains("on"),
-          remove_punctuation: document
-            .getElementById("toggle-punct")
-            .classList.contains("on"),
-          remove_stopwords: document
+          sectioning: document
             .getElementById("toggle-stop")
             .classList.contains("on"),
         };
@@ -2516,18 +2534,15 @@
         spinner.style.display = "inline-flex";
         const container = document.getElementById("summary-cards-container");
 
-        // Show skeleton placeholders
-        container.innerHTML = state.sections
-          .map(
-            () => `
+        // Show single skeleton placeholder (one full-document summary)
+        container.innerHTML = `
     <div class="summary-card">
-      <div class="skeleton" style="height:14px;width:80px;margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:14px;width:120px;margin-bottom:14px;"></div>
       <div class="skeleton" style="height:12px;width:100%;margin-bottom:7px;"></div>
-      <div class="skeleton" style="height:12px;width:92%;margin-bottom:7px;"></div>
+      <div class="skeleton" style="height:12px;width:95%;margin-bottom:7px;"></div>
+      <div class="skeleton" style="height:12px;width:88%;margin-bottom:7px;"></div>
       <div class="skeleton" style="height:12px;width:76%;"></div>
-    </div>`,
-          )
-          .join("");
+    </div>`;
 
         try {
           const res = await fetch(`${API_BASE}/summarize`, {
@@ -2569,12 +2584,14 @@
       }
 
       function downloadSummaries() {
-        const blob = new Blob([JSON.stringify(state.summaries, null, 2)], {
-          type: "application/json",
-        });
+        const lines = state.summaries.map(s =>
+          `${"=".repeat(60)}\n${s.section}\n${"=".repeat(60)}\n${s.summary}`
+        ).join("\n\n");
+        const content = `NLP RESEARCH PIPELINE — SUMMARIES\nGenerated: ${new Date().toLocaleString()}\n\n${lines}\n`;
+        const blob = new Blob([content], { type: "text/plain" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "summaries.json";
+        a.download = "summaries.txt";
         a.click();
       }
 
@@ -2726,18 +2743,36 @@
       }
 
       function downloadInsights() {
-        const report = {
-          pipeline: "Lumina NLP Research Pipeline",
-          generated_at: new Date().toISOString(),
-          summaries: state.summaries,
-          sections: state.sections,
-        };
-        const blob = new Blob([JSON.stringify(report, null, 2)], {
-          type: "application/json",
-        });
+        const sep  = "=".repeat(60);
+        const sep2 = "-".repeat(60);
+
+        const summaryBlock = state.summaries.map(s =>
+          `${s.section}\n${sep2}\n${s.summary}`
+        ).join("\n\n");
+
+        const sectionBlock = state.sections.map(s =>
+          `${s.name} (${s.words} words)\n${sep2}\n${s.text}`
+        ).join("\n\n");
+
+        const content = [
+          "NLP RESEARCH PIPELINE — FULL REPORT",
+          `Generated: ${new Date().toLocaleString()}`,
+          "",
+          sep,
+          "SUMMARY",
+          sep,
+          summaryBlock,
+          "",
+          sep,
+          "EXTRACTED SECTIONS",
+          sep,
+          sectionBlock,
+        ].join("\n");
+
+        const blob = new Blob([content], { type: "text/plain" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "research-insights.json";
+        a.download = "research-insights.txt";
         a.click();
       }
 
