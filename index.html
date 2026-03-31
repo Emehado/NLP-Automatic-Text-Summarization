@@ -1,0 +1,2765 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Group 11 — NLP Research Pipeline</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap");
+
+      :root {
+        --bg: #ffffff;
+        --surface: #f5f5f7;
+        --surface2: #e8e8ed;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #1d1d1f;
+        --text-secondary: #6e6e73;
+        --text-tertiary: #a1a1a6;
+        --accent: #000000;
+        --card-shadow:
+          0 2px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+        --card-shadow-hover:
+          0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+        --radius: 18px;
+        --radius-sm: 12px;
+        --transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      [data-theme="dark"] {
+        --bg: #000000;
+        --surface: #1c1c1e;
+        --surface2: #2c2c2e;
+        --border: rgba(255, 255, 255, 0.1);
+        --text: #f5f5f7;
+        --text-secondary: #98989d;
+        --text-tertiary: #636366;
+        --accent: #ffffff;
+        --card-shadow:
+          0 2px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);
+        --card-shadow-hover:
+          0 8px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          "DM Sans",
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        transition:
+          background 0.4s var(--transition),
+          color 0.4s var(--transition);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── NAVBAR ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        transition:
+          background 0.4s var(--transition),
+          border-color 0.4s var(--transition);
+      }
+      [data-theme="dark"] nav {
+        background: rgba(0, 0, 0, 0.85);
+      }
+      .nav-logo {
+        font-family: "DM Serif Display", serif;
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: -0.3px;
+        color: var(--text);
+        text-decoration: none;
+      }
+      .nav-logo span {
+        font-style: italic;
+      }
+
+      .nav-steps {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .nav-step {
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.1px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s var(--transition);
+        border: none;
+        background: none;
+        font-family: inherit;
+      }
+      .nav-step:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+      .nav-step.active {
+        color: var(--text);
+        background: var(--surface2);
+        font-weight: 500;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .theme-toggle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: var(--text);
+      }
+      .theme-toggle:hover {
+        background: var(--surface2);
+      }
+      .theme-toggle svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ── MAIN ── */
+      main {
+        padding-top: 56px;
+        min-height: 100vh;
+      }
+
+      /* ── HERO ── */
+      .hero {
+        padding: 100px 32px 80px;
+        text-align: center;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+      }
+      .hero-eyebrow::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--text);
+        opacity: 0.4;
+      }
+      .hero h1 {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(42px, 6vw, 72px);
+        font-weight: 400;
+        line-height: 1.05;
+        letter-spacing: -1.5px;
+        color: var(--text);
+        margin-bottom: 20px;
+      }
+      .hero h1 em {
+        font-style: italic;
+        color: var(--text-secondary);
+      }
+      .hero p {
+        font-size: 18px;
+        font-weight: 300;
+        line-height: 1.65;
+        color: var(--text-secondary);
+        max-width: 500px;
+        margin: 0 auto 40px;
+      }
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--text);
+        color: var(--bg);
+        padding: 14px 28px;
+        border-radius: 40px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+        transition: all 0.25s var(--transition);
+        text-decoration: none;
+      }
+      .hero-cta:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+      .hero-cta svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ── PROGRESS BAR ── */
+      .progress-bar {
+        max-width: 760px;
+        margin: 0 auto 60px;
+        padding: 0 32px;
+      }
+      .progress-track {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        position: relative;
+      }
+      .progress-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        position: relative;
+      }
+      .progress-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        width: 100%;
+        height: 1px;
+        background: var(--border);
+        z-index: 0;
+        transition: background 0.3s;
+      }
+      .progress-step.completed:not(:last-child)::after {
+        background: var(--text);
+      }
+      .step-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s var(--transition);
+      }
+      .progress-step.active .step-dot {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+      .progress-step.completed .step-dot {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+      .step-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        text-align: center;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        transition: color 0.3s;
+      }
+      .progress-step.active .step-label,
+      .progress-step.completed .step-label {
+        color: var(--text);
+      }
+
+      /* ── PAGE SECTIONS ── */
+      .page {
+        display: none;
+        animation: fadeUp 0.5s var(--transition) both;
+      }
+      .page.active {
+        display: block;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section-container {
+        max-width: 840px;
+        margin: 0 auto;
+        padding: 0 32px 80px;
+      }
+
+      .page-header {
+        margin-bottom: 48px;
+      }
+      .page-number {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+        margin-bottom: 12px;
+      }
+      .page-title {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 400;
+        letter-spacing: -0.8px;
+        line-height: 1.15;
+        margin-bottom: 12px;
+      }
+      .page-desc {
+        font-size: 16px;
+        font-weight: 300;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      /* ── CARD ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        transition:
+          box-shadow 0.3s var(--transition),
+          border-color 0.3s;
+      }
+      .card:hover {
+        box-shadow: var(--card-shadow-hover);
+      }
+      .card-pad {
+        padding: 28px;
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+      }
+      .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.1px;
+      }
+      .card-subtitle {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        margin-top: 2px;
+      }
+
+      /* ── UPLOAD ZONE ── */
+      .upload-zone {
+        border: 1.5px dashed var(--border);
+        border-radius: var(--radius);
+        padding: 60px 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s var(--transition);
+        background: var(--bg);
+        position: relative;
+        overflow: hidden;
+      }
+      .upload-zone:hover,
+      .upload-zone.drag-over {
+        border-color: var(--text);
+        background: var(--surface);
+      }
+      .upload-zone input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .upload-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+      }
+      .upload-icon svg {
+        width: 24px;
+        height: 24px;
+        color: var(--text-secondary);
+      }
+      .upload-title {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .upload-sub {
+        font-size: 13px;
+        color: var(--text-tertiary);
+      }
+      .upload-sub strong {
+        color: var(--text-secondary);
+      }
+
+      /* ── BUTTONS ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        border-radius: 40px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+        transition: all 0.2s var(--transition);
+        text-decoration: none;
+      }
+      .btn svg {
+        width: 15px;
+        height: 15px;
+      }
+      .btn-primary {
+        background: var(--text);
+        color: var(--bg);
+      }
+      .btn-primary:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        background: var(--surface);
+      }
+      .btn-ghost {
+        background: none;
+        color: var(--text-secondary);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 12px;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* ── TEXT PREVIEW ── */
+      .text-preview {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+        max-height: 240px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+      .text-preview::-webkit-scrollbar {
+        width: 4px;
+      }
+      .text-preview::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .text-preview::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      /* ── FILE CHIP ── */
+      .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 40px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .file-chip-icon {
+        width: 28px;
+        height: 28px;
+        background: var(--surface2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .file-chip-icon svg {
+        width: 14px;
+        height: 14px;
+      }
+      .file-chip-remove {
+        cursor: pointer;
+        color: var(--text-tertiary);
+        display: flex;
+        align-items: center;
+      }
+      .file-chip-remove:hover {
+        color: var(--text);
+      }
+
+      /* ── ROW UTILS ── */
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .row.wrap {
+        flex-wrap: wrap;
+      }
+      .col {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .mt-4 {
+        margin-top: 4px;
+      }
+      .mt-8 {
+        margin-top: 8px;
+      }
+      .mt-12 {
+        margin-top: 12px;
+      }
+      .mt-16 {
+        margin-top: 16px;
+      }
+      .mt-24 {
+        margin-top: 24px;
+      }
+      .mt-32 {
+        margin-top: 32px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      /* ── SKELETON ── */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--surface) 25%,
+          var(--surface2) 50%,
+          var(--surface) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      @keyframes shimmer {
+        to {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ── SPINNER ── */
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border);
+        border-top-color: var(--text);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── BADGE ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+      .badge-default {
+        background: var(--surface2);
+        color: var(--text-secondary);
+      }
+      .badge-dark {
+        background: var(--text);
+        color: var(--bg);
+      }
+
+      /* ── ACCORDION ── */
+      .accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .accordion-item {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background: var(--bg);
+        transition: border-color 0.2s;
+      }
+      .accordion-item.open {
+        border-color: var(--text);
+      }
+      .accordion-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .accordion-trigger-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .accordion-index {
+        width: 24px;
+        height: 24px;
+        background: var(--surface);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-tertiary);
+      }
+      .accordion-name {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .accordion-meta {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+      .accordion-chevron {
+        width: 20px;
+        height: 20px;
+        color: var(--text-tertiary);
+        transition: transform 0.25s var(--transition);
+      }
+      .accordion-item.open .accordion-chevron {
+        transform: rotate(180deg);
+      }
+      .accordion-content {
+        display: none;
+        padding: 0 20px 16px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+      .accordion-item.open .accordion-content {
+        display: block;
+      }
+
+      /* ── TOGGLE ── */
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+      }
+      .toggle-label {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .toggle-sub {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        margin-top: 1px;
+      }
+      .toggle {
+        width: 44px;
+        height: 26px;
+        border-radius: 13px;
+        background: var(--surface2);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: background 0.25s;
+        flex-shrink: 0;
+      }
+      .toggle.on {
+        background: var(--text);
+      }
+      .toggle::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--bg);
+        top: 3px;
+        left: 3px;
+        transition: transform 0.25s var(--transition);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .toggle.on::after {
+        transform: translateX(18px);
+      }
+
+      /* ── SUMMARY CARD ── */
+      .summary-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s var(--transition);
+        animation: fadeUp 0.4s var(--transition) both;
+      }
+      .summary-card:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-2px);
+      }
+      .summary-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .summary-tag {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+      }
+      .summary-text {
+        font-size: 15px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        font-weight: 300;
+      }
+
+      /* ── INSIGHT CARDS ── */
+      .insight-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .insight-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+        transition: all 0.3s var(--transition);
+      }
+      .insight-card:hover {
+        box-shadow: var(--card-shadow-hover);
+        background: var(--bg);
+      }
+      .insight-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+      }
+      .insight-card-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+      .insight-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .insight-card p {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        font-weight: 300;
+      }
+
+      /* ── KEYWORD CLOUD ── */
+      .keyword-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 0;
+      }
+      .keyword-pill {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        transition: all 0.2s;
+        cursor: default;
+      }
+      .keyword-pill:hover {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+      .keyword-pill.large {
+        font-size: 15px;
+        padding: 8px 18px;
+      }
+      .keyword-pill.small {
+        font-size: 11px;
+        padding: 4px 10px;
+        color: var(--text-tertiary);
+      }
+
+      /* ── CHART BARS ── */
+      .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .bar-label {
+        font-size: 13px;
+        width: 160px;
+        flex-shrink: 0;
+        color: var(--text-secondary);
+      }
+      .bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--surface2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        background: var(--text);
+        border-radius: 4px;
+        transition: width 1s var(--transition);
+      }
+      .bar-value {
+        font-size: 12px;
+        font-weight: 600;
+        width: 32px;
+        text-align: right;
+        color: var(--text-tertiary);
+      }
+
+      /* ── PERCENTAGE BAR ── */
+      .pct-bar-wrap {
+        margin: 16px 0;
+      }
+      .pct-bar-track {
+        height: 12px;
+        background: var(--surface2);
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+      }
+      .pct-bar-a {
+        background: var(--text);
+        border-radius: 6px 0 0 6px;
+        transition: width 1s var(--transition);
+      }
+      .pct-bar-b {
+        background: var(--surface2);
+        flex: 1;
+      }
+      .pct-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+      }
+      .pct-label {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .pct-label.secondary {
+        color: var(--text-tertiary);
+      }
+
+      /* ── NETWORK GRAPH ── */
+      .network-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .net-group {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        background: var(--bg);
+      }
+      .net-group-title {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+        margin-bottom: 8px;
+      }
+      .net-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .net-tag {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .net-tag.highlight {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+
+      /* ── TRENDING ── */
+      .trend-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .trend-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        transition: border-color 0.2s;
+      }
+      .trend-item:hover {
+        border-color: var(--text);
+      }
+      .trend-rank {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--border);
+        width: 28px;
+        font-family: "DM Serif Display", serif;
+      }
+      .trend-info {
+        flex: 1;
+      }
+      .trend-name {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .trend-meta {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        margin-top: 2px;
+      }
+      .trend-arrow {
+        color: var(--text-tertiary);
+      }
+      .trend-arrow svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ── STEP NAV ── */
+      .step-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+      }
+
+      /* ── DIVIDER ── */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 24px 0;
+      }
+
+      /* ── STATUS CHIP ── */
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--text-tertiary);
+      }
+      .status-dot.active {
+        background: #34c759;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* ── LOADING OVERLAY ── */
+      .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 48px;
+        text-align: center;
+      }
+      .loading-state p {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      /* ── NOTIFICATION ── */
+      .notification {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 200;
+        background: var(--text);
+        color: var(--bg);
+        padding: 14px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.4s var(--transition);
+        max-width: 340px;
+      }
+      .notification.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .notification svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+
+      /* ── COMPARE BOX ── */
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .compare-pane {
+        padding: 0;
+      }
+      .compare-pane:first-child {
+        border-right: 1px solid var(--border);
+      }
+      .compare-head {
+        padding: 12px 16px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+      }
+      .compare-body {
+        padding: 16px;
+        font-size: 12px;
+        line-height: 1.65;
+        color: var(--text-secondary);
+        font-family: "SF Mono", monospace;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      /* ── METRIC ── */
+      .metric-row {
+        display: flex;
+        gap: 16px;
+      }
+      .metric-box {
+        flex: 1;
+        padding: 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-align: center;
+      }
+      .metric-value {
+        font-family: "DM Serif Display", serif;
+        font-size: 36px;
+        font-weight: 400;
+        letter-spacing: -1px;
+      }
+      .metric-label {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        margin-top: 4px;
+        font-weight: 500;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 600px) {
+        nav {
+          padding: 0 16px;
+        }
+        .nav-steps {
+          display: none;
+        }
+        .hero {
+          padding: 60px 16px 40px;
+        }
+        .section-container {
+          padding: 0 16px 60px;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+        .compare-pane:first-child {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+        .metric-row {
+          flex-direction: column;
+        }
+        .bar-label {
+          width: 100px;
+          font-size: 11px;
+        }
+        .insight-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav>
+      <a href="#" class="nav-logo">Group 11<span>.</span></a>
+      <div class="nav-steps">
+        <button class="nav-step active" onclick="goTo(0)">Extract</button>
+        <button class="nav-step" onclick="goTo(1)">Preprocess</button>
+        <button class="nav-step" onclick="goTo(2)">Summarize</button>
+        <button class="nav-step" onclick="goTo(3)">Insights</button>
+      </div>
+      <div class="nav-right">
+        <button
+          class="theme-toggle"
+          onclick="toggleTheme()"
+          title="Toggle theme"
+        >
+          <svg
+            id="theme-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- HERO (shown only on step 0) -->
+      <div id="hero-section" class="hero">
+        <div class="hero-eyebrow">NLP Research Pipeline</div>
+        <h1>Transform papers into <em>insights.</em></h1>
+        <p>
+          A four-step pipeline that extracts, preprocesses, summarizes, and
+          analyzes your academic research documents.
+        </p>
+        <button
+          class="hero-cta"
+          onclick="
+            goTo(0);
+            document.getElementById('hero-section').style.display = 'none';
+          "
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+          Begin Pipeline
+        </button>
+      </div>
+
+      <!-- STEP 1: PDF → TXT -->
+      <div class="page active" id="page-0">
+        <div class="section-container">
+          <!-- Progress -->
+          <div class="progress-bar" style="padding: 0; margin-bottom: 48px">
+            <div class="progress-track">
+              <div class="progress-step active" onclick="goTo(0)">
+                <div class="step-dot">1</div>
+                <div class="step-label">Extract</div>
+              </div>
+              <div class="progress-step" onclick="goTo(1)">
+                <div class="step-dot">2</div>
+                <div class="step-label">Preprocess</div>
+              </div>
+              <div class="progress-step" onclick="goTo(2)">
+                <div class="step-dot">3</div>
+                <div class="step-label">Summarize</div>
+              </div>
+              <div class="progress-step" onclick="goTo(3)">
+                <div class="step-dot">4</div>
+                <div class="step-label">Insights</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-header">
+            <div class="page-number">Step 01</div>
+            <h2 class="page-title">PDF to Text Extraction</h2>
+            <p class="page-desc">
+              Upload your research PDF and extract clean, structured text ready
+              for processing.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Upload Document</div>
+                <div class="card-subtitle">PDF files up to 50MB</div>
+              </div>
+              <div class="status-chip" id="step1-status">
+                <div class="status-dot"></div>
+                Waiting
+              </div>
+            </div>
+            <div class="card-pad">
+              <!-- Upload Zone -->
+              <div
+                class="upload-zone"
+                id="upload-zone-1"
+                ondragover="handleDragOver(event, 'upload-zone-1')"
+                ondragleave="handleDragLeave('upload-zone-1')"
+                ondrop="handleDrop(event, 'upload-zone-1', 'pdf')"
+              >
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onchange="handleFileSelect(event, 'pdf')"
+                />
+                <div class="upload-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+                <div class="upload-title">Drop your PDF here</div>
+                <div class="upload-sub">
+                  or <strong>click to browse</strong> — supports PDF
+                </div>
+              </div>
+
+              <!-- File chip (hidden by default) -->
+              <div id="file-chip-1" style="display: none; margin-top: 16px">
+                <div class="file-chip">
+                  <div class="file-chip-icon">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                  </div>
+                  <span id="file-name-1">document.pdf</span>
+                  <div class="file-chip-remove" onclick="removeFile(1)">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="row">
+                <button
+                  class="btn btn-primary"
+                  id="convert-btn"
+                  onclick="runExtraction()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  Extract Text
+                </button>
+                <span id="extract-spinner" style="display: none"
+                  ><div class="spinner"></div
+                ></span>
+                <span class="spacer"></span>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  id="download-txt-btn"
+                  style="display: none"
+                  onclick="downloadTxt()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download .txt
+                </button>
+              </div>
+
+              <!-- Output preview -->
+              <div id="extract-output" style="display: none; margin-top: 24px">
+                <div class="row" style="margin-bottom: 10px">
+                  <span style="font-size: 13px; font-weight: 600"
+                    >Extracted Text</span
+                  >
+                  <span class="spacer"></span>
+                  <span class="badge badge-dark" id="word-count-badge"
+                    >0 words</span
+                  >
+                </div>
+                <div class="text-preview" id="extracted-text-preview"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button class="btn btn-primary" onclick="goTo(1)">
+              Continue to Preprocessing
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: TXT → Sections + Preprocess -->
+      <div class="page" id="page-1">
+        <div class="section-container">
+          <div class="progress-bar" style="padding: 0; margin-bottom: 48px">
+            <div class="progress-track">
+              <div class="progress-step completed" onclick="goTo(0)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Extract</div>
+              </div>
+              <div class="progress-step active" onclick="goTo(1)">
+                <div class="step-dot">2</div>
+                <div class="step-label">Preprocess</div>
+              </div>
+              <div class="progress-step" onclick="goTo(2)">
+                <div class="step-dot">3</div>
+                <div class="step-label">Summarize</div>
+              </div>
+              <div class="progress-step" onclick="goTo(3)">
+                <div class="step-dot">4</div>
+                <div class="step-label">Insights</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-header">
+            <div class="page-number">Step 02</div>
+            <h2 class="page-title">Section Splitting & Preprocessing</h2>
+            <p class="page-desc">
+              Intelligently split text into sections and clean it for downstream
+              NLP tasks.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <!-- Import -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Import Text</div>
+                  <div class="card-subtitle">From step 1 or upload .txt</div>
+                </div>
+              </div>
+              <div class="card-pad">
+                <div
+                  class="upload-zone"
+                  style="padding: 32px 20px"
+                  id="upload-zone-2"
+                  ondragover="handleDragOver(event, 'upload-zone-2')"
+                  ondragleave="handleDragLeave('upload-zone-2')"
+                  ondrop="handleDrop(event, 'upload-zone-2', 'txt')"
+                >
+                  <input
+                    type="file"
+                    accept=".txt"
+                    onchange="handleFileSelect(event, 'txt')"
+                  />
+                  <div
+                    class="upload-icon"
+                    style="width: 40px; height: 40px; border-radius: 10px"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                  </div>
+                  <div
+                    style="font-size: 13px; font-weight: 500; margin-top: 10px"
+                  >
+                    Drop .txt file
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-tertiary);
+                      margin-top: 4px;
+                    "
+                  >
+                    or click to browse
+                  </div>
+                </div>
+                <div style="margin-top: 12px">
+                  <button
+                    class="btn btn-secondary"
+                    style="width: 100%; justify-content: center"
+                    onclick="importFromStep1()"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      style="width: 14px; height: 14px"
+                    >
+                      <polyline points="17 1 21 5 17 9" />
+                      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                      <polyline points="7 23 3 19 7 15" />
+                      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                    </svg>
+                    Use Extracted Text
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Options -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Options</div>
+                  <div class="card-subtitle">Configure preprocessing</div>
+                </div>
+              </div>
+              <div class="card-pad col">
+                <div class="toggle-row">
+                  <div>
+                    <div class="toggle-label">Lowercase</div>
+                    <div class="toggle-sub">Convert all text to lowercase</div>
+                  </div>
+                  <button
+                    class="toggle on"
+                    id="toggle-lower"
+                    onclick="toggleBtn('toggle-lower')"
+                  ></button>
+                </div>
+
+                <div class="toggle-row">
+                  <div>
+                    <div class="toggle-label">Text Sectioning</div>
+                    <div class="toggle-sub">Section Text</div>
+                  </div>
+                  <button
+                    class="toggle on"
+                    id="toggle-stop"
+                    onclick="toggleBtn('toggle-stop')"
+                  ></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-24">
+            <div class="row">
+              <button class="btn btn-primary" onclick="runPreprocessing()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                Process Text
+              </button>
+              <span id="preprocess-spinner" style="display: none"
+                ><div class="spinner"></div
+              ></span>
+            </div>
+          </div>
+
+          <!-- Compare view -->
+          <div id="preprocess-output" style="display: none" class="mt-24">
+            <div class="card">
+              <div class="card-header">
+                <div><div class="card-title">Before vs After</div></div>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  onclick="toggleShowSteps()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    style="width: 14px; height: 14px"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  Show Steps
+                </button>
+              </div>
+              <div class="compare-grid">
+                <div class="compare-pane">
+                  <div class="compare-head">Original</div>
+                  <div class="compare-body" id="compare-before"></div>
+                </div>
+                <div class="compare-pane">
+                  <div class="compare-head">Preprocessed</div>
+                  <div class="compare-body" id="compare-after"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section breakdown -->
+            <div style="margin-top: 24px">
+              <div class="row" style="margin-bottom: 16px">
+                <span style="font-size: 15px; font-weight: 600"
+                  >Section Breakdown</span
+                >
+                <span class="spacer"></span>
+                <span class="badge badge-default" id="section-count-badge"
+                  >0 sections</span
+                >
+              </div>
+              <div class="accordion" id="sections-accordion"></div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn btn-secondary" onclick="goTo(0)">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 14px; height: 14px"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Back
+            </button>
+            <button class="btn btn-primary" onclick="goTo(2)">
+              Continue to Summarization
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Summarization -->
+      <div class="page" id="page-2">
+        <div class="section-container">
+          <div class="progress-bar" style="padding: 0; margin-bottom: 48px">
+            <div class="progress-track">
+              <div class="progress-step completed" onclick="goTo(0)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Extract</div>
+              </div>
+              <div class="progress-step completed" onclick="goTo(1)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Preprocess</div>
+              </div>
+              <div class="progress-step active" onclick="goTo(2)">
+                <div class="step-dot">3</div>
+                <div class="step-label">Summarize</div>
+              </div>
+              <div class="progress-step" onclick="goTo(3)">
+                <div class="step-dot">4</div>
+                <div class="step-label">Insights</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-header">
+            <div class="page-number">Step 03</div>
+            <h2 class="page-title">NLP Summarization</h2>
+            <p class="page-desc">
+              Using BART to generate concise, accurate summaries of each
+              section.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Model Configuration</div>
+                <div class="card-subtitle">facebook/bart-large-cnn</div>
+              </div>
+              <div class="status-chip">
+                <div class="status-dot active"></div>
+                Ready
+              </div>
+            </div>
+            <div class="card-pad">
+              <div class="metric-row">
+                <div class="metric-box">
+                  <div class="metric-value" id="sections-ready">5</div>
+                  <div class="metric-label">Sections Ready</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-value">128</div>
+                  <div class="metric-label">Max Token Length</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-value">BART</div>
+                  <div class="metric-label">Model</div>
+                </div>
+              </div>
+              <div style="margin-top: 20px" class="row">
+                <button class="btn btn-primary" onclick="runSummarization()">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  Generate Summaries
+                </button>
+                <span id="summarize-spinner" style="display: none"
+                  ><div class="spinner"></div
+                ></span>
+                <span class="spacer"></span>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  id="download-summaries-btn"
+                  style="display: none"
+                  onclick="downloadSummaries()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download JSON
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary cards -->
+          <div
+            id="summary-cards-container"
+            style="
+              margin-top: 28px;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            "
+          ></div>
+
+          <div class="step-nav">
+            <button class="btn btn-secondary" onclick="goTo(1)">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 14px; height: 14px"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Back
+            </button>
+            <button class="btn btn-primary" onclick="goTo(3)">
+              View Insights
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Insights -->
+      <div class="page" id="page-3">
+        <div class="section-container">
+          <div class="progress-bar" style="padding: 0; margin-bottom: 48px">
+            <div class="progress-track">
+              <div class="progress-step completed" onclick="goTo(0)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Extract</div>
+              </div>
+              <div class="progress-step completed" onclick="goTo(1)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Preprocess</div>
+              </div>
+              <div class="progress-step completed" onclick="goTo(2)">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Summarize</div>
+              </div>
+              <div class="progress-step active" onclick="goTo(3)">
+                <div class="step-dot">4</div>
+                <div class="step-label">Insights</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-header">
+            <div class="page-number">Step 04</div>
+            <h2 class="page-title">Research Insights & Analysis</h2>
+            <p class="page-desc">
+              Deep analysis of your research summaries, revealing themes,
+              methods, and emerging trends.
+            </p>
+          </div>
+
+          <!-- a. Research Themes -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Dominant Research Themes</div>
+                <div class="card-subtitle">Keyword frequency analysis</div>
+              </div>
+              <div class="badge badge-dark">NLP</div>
+            </div>
+            <div class="card-pad">
+              <div
+                style="
+                  font-size: 13px;
+                  font-weight: 600;
+                  margin-bottom: 12px;
+                  color: var(--text-secondary);
+                "
+              >
+                Top Keywords
+              </div>
+              <div class="keyword-cloud" id="keyword-cloud">
+                <span
+                  style="
+                    font-size: 13px;
+                    color: var(--text-tertiary);
+                    font-style: italic;
+                  "
+                  >Keywords will appear after generating summaries.</span
+                >
+              </div>
+              <div class="divider"></div>
+              <div
+                style="
+                  font-size: 13px;
+                  font-weight: 600;
+                  margin-bottom: 16px;
+                  color: var(--text-secondary);
+                "
+              >
+                Research Pillars
+              </div>
+              <div class="bar-chart" id="pillars-chart">
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text-tertiary);
+                    font-style: italic;
+                  "
+                >
+                  Pillars will appear after generating summaries.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- b. School of Thought -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">School of Thought</div>
+                <div class="card-subtitle">Research cohesion analysis</div>
+              </div>
+            </div>
+            <div class="card-pad">
+              <div
+                style="
+                  padding: 20px;
+                  background: var(--bg);
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-sm);
+                  margin-bottom: 16px;
+                "
+              >
+                <div
+                  id="school-label"
+                  style="
+                    font-size: 22px;
+                    font-family: &quot;DM Serif Display&quot;, serif;
+                    margin-bottom: 8px;
+                    letter-spacing: -0.5px;
+                  "
+                >
+                  Awaiting analysis…
+                </div>
+                <div
+                  id="school-desc"
+                  style="
+                    font-size: 14px;
+                    color: var(--text-secondary);
+                    font-weight: 300;
+                    line-height: 1.65;
+                  "
+                >
+                  Run the full pipeline to see the school of thought analysis.
+                </div>
+              </div>
+              <div
+                style="display: flex; gap: 8px; flex-wrap: wrap"
+                id="school-tags"
+              ></div>
+            </div>
+          </div>
+
+          <!-- c. Alignment -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Research Alignment</div>
+                <div class="card-subtitle">
+                  Theoretical vs Applied classification
+                </div>
+              </div>
+            </div>
+            <div class="card-pad">
+              <div class="pct-bar-wrap">
+                <div class="pct-bar-track">
+                  <div
+                    class="pct-bar-a"
+                    style="width: 0%"
+                    id="alignment-bar"
+                    data-width="0%"
+                  ></div>
+                  <div class="pct-bar-b"></div>
+                </div>
+                <div class="pct-labels" id="alignment-labels">
+                  <div class="pct-label">Applied — —</div>
+                  <div class="pct-label secondary">Theoretical — —</div>
+                </div>
+              </div>
+              <div
+                id="alignment-desc"
+                style="
+                  font-size: 14px;
+                  color: var(--text-secondary);
+                  font-weight: 300;
+                  line-height: 1.65;
+                  margin-top: 12px;
+                "
+              >
+                Run the full pipeline to see alignment analysis.
+              </div>
+            </div>
+          </div>
+
+          <!-- d. Research Methods -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Preferred Research Methods</div>
+                <div class="card-subtitle">Methodology distribution</div>
+              </div>
+            </div>
+            <div class="card-pad">
+              <div
+                class="bar-chart"
+                id="methods-chart"
+                style="margin-bottom: 20px"
+              >
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text-tertiary);
+                    font-style: italic;
+                  "
+                >
+                  Methods will appear after generating summaries.
+                </div>
+              </div>
+              <div
+                id="methods-desc"
+                style="
+                  font-size: 14px;
+                  color: var(--text-secondary);
+                  font-weight: 300;
+                  line-height: 1.65;
+                "
+              ></div>
+            </div>
+          </div>
+
+          <!-- e. Emerging Topics -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Emerging Hot Topics</div>
+                <div class="card-subtitle">
+                  Trend detection from recent summaries
+                </div>
+              </div>
+              <div class="badge badge-dark">Trending</div>
+            </div>
+            <div class="card-pad">
+              <div class="trend-list" id="trend-list">
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text-tertiary);
+                    font-style: italic;
+                    padding: 16px 0;
+                  "
+                >
+                  Trending topics will appear after generating summaries.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- f. Cross-Disciplinary -->
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Cross-Disciplinary Overlaps</div>
+                <div class="card-subtitle">
+                  Shared themes across departments
+                </div>
+              </div>
+            </div>
+            <div class="card-pad">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                  gap: 12px;
+                "
+                id="cross-disciplinary-grid"
+              >
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text-tertiary);
+                    font-style: italic;
+                    padding: 8px 0;
+                  "
+                >
+                  Cross-disciplinary overlaps will appear after generating
+                  summaries.
+                </div>
+              </div>
+              <div
+                style="
+                  margin-top: 16px;
+                  padding: 16px;
+                  background: var(--surface);
+                  border-radius: var(--radius-sm);
+                "
+              >
+                <div
+                  style="font-size: 13px; font-weight: 600; margin-bottom: 6px"
+                >
+                  Insight
+                </div>
+                <div
+                  id="cross-disciplinary-insight"
+                  style="
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                    font-weight: 300;
+                    line-height: 1.6;
+                  "
+                >
+                  Run the pipeline to uncover cross-departmental research
+                  connections.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download button -->
+          <div class="row" style="justify-content: center; margin-top: 32px">
+            <button class="btn btn-primary" onclick="downloadInsights()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Full Report
+            </button>
+            <button class="btn btn-secondary" onclick="goTo(0)">
+              Start New Pipeline
+            </button>
+          </div>
+
+          <div style="height: 40px"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      <span id="notification-text">Done!</span>
+    </div>
+
+    <script>
+      // ── STATE ──
+      let state = {
+        currentStep: 0,
+        pdfFile: null,
+        extractedText: "",
+        preprocessedText: "",
+        sections: [],
+        summaries: [],
+        isDark: false,
+      };
+
+      // ── API BASE URL — update to match your backend ──
+      const API_BASE = "http://localhost:8000";
+
+      // ── NAVIGATION ──
+      function goTo(step) {
+        document.getElementById("hero-section").style.display = "none";
+        document.querySelectorAll(".page").forEach((p, i) => {
+          p.classList.toggle("active", i === step);
+        });
+        document.querySelectorAll(".nav-step").forEach((s, i) => {
+          s.classList.toggle("active", i === step);
+        });
+        state.currentStep = step;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Animate bars on insights page
+        if (step === 3) {
+          setTimeout(animateBars, 400);
+          loadInsights();
+        }
+      }
+
+      function animateBars() {
+        document.querySelectorAll(".bar-fill").forEach((bar) => {
+          bar.style.width = bar.dataset.width;
+        });
+        const alignBar = document.getElementById("alignment-bar");
+        if (alignBar) alignBar.style.width = alignBar.dataset.width;
+      }
+
+      // ── THEME ──
+      function toggleTheme() {
+        state.isDark = !state.isDark;
+        document.documentElement.setAttribute(
+          "data-theme",
+          state.isDark ? "dark" : "light",
+        );
+        const icon = document.getElementById("theme-icon");
+        if (state.isDark) {
+          icon.innerHTML =
+            '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        } else {
+          icon.innerHTML =
+            '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        }
+      }
+
+      // ── FILE HANDLING ──
+      function handleDragOver(e, id) {
+        e.preventDefault();
+        document.getElementById(id).classList.add("drag-over");
+      }
+      function handleDragLeave(id) {
+        document.getElementById(id).classList.remove("drag-over");
+      }
+      function handleDrop(e, id, type) {
+        e.preventDefault();
+        document.getElementById(id).classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        processFile(file, type);
+      }
+      function handleFileSelect(e, type) {
+        const file = e.target.files[0];
+        if (file) processFile(file, type);
+      }
+      function processFile(file, type) {
+        if (type === "pdf") {
+          state.pdfFile = file;
+          document.getElementById("file-name-1").textContent = file.name;
+          document.getElementById("file-chip-1").style.display = "flex";
+          document.getElementById("step1-status").innerHTML =
+            '<div class="status-dot active"></div> File Loaded';
+        }
+        if (type === "txt") {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            state.extractedText = e.target.result;
+            showNotification("Text file loaded");
+          };
+          reader.readAsText(file);
+        }
+      }
+      function removeFile(n) {
+        if (n === 1) {
+          state.pdfFile = null;
+          document.getElementById("file-chip-1").style.display = "none";
+          document.getElementById("step1-status").innerHTML =
+            '<div class="status-dot"></div> Waiting';
+        }
+      }
+
+      // ── EXTRACTION ──
+      async function runExtraction() {
+        if (!state.pdfFile) {
+          showNotification("Please upload a PDF file first.");
+          return;
+        }
+
+        const spinner = document.getElementById("extract-spinner");
+        const btn = document.getElementById("convert-btn");
+        spinner.style.display = "inline-flex";
+        btn.disabled = true;
+        document.getElementById("step1-status").innerHTML =
+          '<div class="status-dot active"></div> Processing';
+
+        try {
+          const formData = new FormData();
+          formData.append("file", state.pdfFile);
+
+          const res = await fetch(`${API_BASE}/extract`, {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+          const data = await res.json();
+          // Expected: { text: string }
+
+          state.extractedText = data.text;
+          const words = data.text.trim().split(/\s+/).length;
+          document.getElementById("extracted-text-preview").textContent =
+            data.text;
+          document.getElementById("word-count-badge").textContent =
+            `${words} words`;
+          document.getElementById("extract-output").style.display = "block";
+          document.getElementById("download-txt-btn").style.display =
+            "inline-flex";
+          document.getElementById("step1-status").innerHTML =
+            '<div class="status-dot active"></div> Complete';
+          showNotification("Text extracted successfully");
+        } catch (err) {
+          document.getElementById("step1-status").innerHTML =
+            '<div class="status-dot"></div> Error';
+          showNotification(`Extraction failed: ${err.message}`);
+          console.error(err);
+        } finally {
+          spinner.style.display = "none";
+          btn.disabled = false;
+        }
+      }
+
+      function downloadTxt() {
+        const blob = new Blob([state.extractedText], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "extracted.txt";
+        a.click();
+      }
+
+      // ── PREPROCESSING ──
+      function importFromStep1() {
+        if (!state.extractedText) {
+          showNotification("No extracted text found. Run Step 1 first.");
+          return;
+        }
+        showNotification("Text imported from Step 1");
+      }
+
+      function toggleBtn(id) {
+        document.getElementById(id).classList.toggle("on");
+      }
+
+      async function runPreprocessing() {
+        const text = state.extractedText;
+        if (!text) {
+          showNotification("No text available. Complete Step 1 first.");
+          return;
+        }
+
+        const spinner = document.getElementById("preprocess-spinner");
+        spinner.style.display = "inline-flex";
+
+        const options = {
+          lowercase: document
+            .getElementById("toggle-lower")
+            .classList.contains("on"),
+          remove_punctuation: document
+            .getElementById("toggle-punct")
+            .classList.contains("on"),
+          remove_stopwords: document
+            .getElementById("toggle-stop")
+            .classList.contains("on"),
+        };
+
+        try {
+          const res = await fetch(`${API_BASE}/preprocess`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, options }),
+          });
+          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+          const data = await res.json();
+          // Expected: { preprocessed_text: string, sections: [{ name: string, words: number, text: string }] }
+
+          state.preprocessedText = data.preprocessed_text;
+          state.sections = data.sections;
+
+          document.getElementById("compare-before").textContent =
+            text.substring(0, 600) + (text.length > 600 ? "…" : "");
+          document.getElementById("compare-after").textContent =
+            data.preprocessed_text.substring(0, 600) +
+            (data.preprocessed_text.length > 600 ? "…" : "");
+          document.getElementById("section-count-badge").textContent =
+            `${data.sections.length} sections`;
+          document.getElementById("sections-ready").textContent =
+            data.sections.length;
+
+          const acc = document.getElementById("sections-accordion");
+          acc.innerHTML = "";
+          data.sections.forEach((s, i) => {
+            acc.innerHTML += `
+        <div class="accordion-item" id="acc-${i}">
+          <div class="accordion-trigger" onclick="toggleAccordion(${i})">
+            <div class="accordion-trigger-left">
+              <div class="accordion-index">${i + 1}</div>
+              <div>
+                <div class="accordion-name">${s.name}</div>
+                <div class="accordion-meta">${s.words} words</div>
+              </div>
+            </div>
+            <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="accordion-content">
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.65;font-weight:300;">${s.text}</div>
+          </div>
+        </div>`;
+          });
+
+          document.getElementById("preprocess-output").style.display = "block";
+          showNotification(
+            `Preprocessing complete — ${data.sections.length} sections found`,
+          );
+        } catch (err) {
+          showNotification(`Preprocessing failed: ${err.message}`);
+          console.error(err);
+        } finally {
+          spinner.style.display = "none";
+        }
+      }
+
+      function toggleAccordion(i) {
+        document.getElementById(`acc-${i}`).classList.toggle("open");
+      }
+
+      function toggleShowSteps() {
+        showNotification("Step-by-step view coming with backend integration");
+      }
+
+      // ── SUMMARIZATION ──
+      async function runSummarization() {
+        if (!state.sections.length) {
+          showNotification("No sections available. Complete Step 2 first.");
+          return;
+        }
+
+        const spinner = document.getElementById("summarize-spinner");
+        spinner.style.display = "inline-flex";
+        const container = document.getElementById("summary-cards-container");
+
+        // Show skeleton placeholders
+        container.innerHTML = state.sections
+          .map(
+            () => `
+    <div class="summary-card">
+      <div class="skeleton" style="height:14px;width:80px;margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:12px;width:100%;margin-bottom:7px;"></div>
+      <div class="skeleton" style="height:12px;width:92%;margin-bottom:7px;"></div>
+      <div class="skeleton" style="height:12px;width:76%;"></div>
+    </div>`,
+          )
+          .join("");
+
+        try {
+          const res = await fetch(`${API_BASE}/summarize`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sections: state.sections }),
+          });
+          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+          const data = await res.json();
+          // Expected: { summaries: [{ section: string, summary: string }] }
+
+          state.summaries = data.summaries;
+          container.innerHTML = "";
+          data.summaries.forEach((s, i) => {
+            const card = document.createElement("div");
+            card.className = "summary-card";
+            card.style.animationDelay = `${i * 0.08}s`;
+            card.innerHTML = `
+        <div class="summary-card-header">
+          <span class="summary-tag">${s.section}</span>
+          <button class="btn btn-ghost btn-sm" onclick="copyToClipboard(\`${s.summary.replace(/`/g, "'")}\`)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <p class="summary-text">${s.summary}</p>`;
+            container.appendChild(card);
+          });
+
+          document.getElementById("download-summaries-btn").style.display =
+            "inline-flex";
+          showNotification(`${data.summaries.length} summaries generated`);
+        } catch (err) {
+          container.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text-tertiary);font-size:14px;">Failed to generate summaries: ${err.message}</div>`;
+          showNotification(`Summarization failed: ${err.message}`);
+          console.error(err);
+        } finally {
+          spinner.style.display = "none";
+        }
+      }
+
+      function downloadSummaries() {
+        const blob = new Blob([JSON.stringify(state.summaries, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "summaries.json";
+        a.click();
+      }
+
+      // ── INSIGHTS ──
+      async function loadInsights() {
+        if (!state.summaries.length) return;
+
+        try {
+          const res = await fetch(`${API_BASE}/insights`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ summaries: state.summaries }),
+          });
+          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+          const data = await res.json();
+          // Expected: {
+          //   keywords: [{ word: string, score: number }],
+          //   pillars: [{ name: string, score: number }],
+          //   school_of_thought: { label: string, cohesion: string, tags: string[], description: string },
+          //   alignment: { applied: number, theoretical: number, description: string },
+          //   methods: [{ name: string, pct: number }],
+          //   trending: [{ name: string, growth: string, description: string }],
+          //   cross_disciplinary: [{ department: string, tags: string[], highlights: string[] }],
+          //   cross_disciplinary_insight: string
+          // }
+          renderInsights(data);
+        } catch (err) {
+          showNotification(`Insights load failed: ${err.message}`);
+          console.error(err);
+        }
+      }
+
+      function renderInsights(data) {
+        // Keywords
+        if (data.keywords) {
+          const cloud = document.getElementById("keyword-cloud");
+          if (cloud) {
+            cloud.innerHTML = data.keywords
+              .map((k) => {
+                const cls =
+                  k.score > 0.7 ? "large" : k.score < 0.4 ? "small" : "";
+                return `<span class="keyword-pill ${cls}">${k.word}</span>`;
+              })
+              .join("");
+          }
+        }
+        // Pillars bar chart
+        if (data.pillars) {
+          const chart = document.getElementById("pillars-chart");
+          if (chart) {
+            chart.innerHTML = data.pillars
+              .map(
+                (p) => `
+        <div class="bar-row">
+          <span class="bar-label">${p.name}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:0%" data-width="${p.score}%"></div></div>
+          <span class="bar-value">${p.score}</span>
+        </div>`,
+              )
+              .join("");
+          }
+        }
+        // School of thought
+        if (data.school_of_thought) {
+          const s = data.school_of_thought;
+          const el = document.getElementById("school-label");
+          if (el) el.textContent = s.label;
+          const desc = document.getElementById("school-desc");
+          if (desc) desc.textContent = s.description;
+          const tags = document.getElementById("school-tags");
+          if (tags)
+            tags.innerHTML = [s.cohesion, ...s.tags]
+              .map(
+                (t, i) =>
+                  `<span class="net-tag ${i === 0 ? "highlight" : ""}">${t}</span>`,
+              )
+              .join("");
+        }
+        // Alignment
+        if (data.alignment) {
+          const bar = document.getElementById("alignment-bar");
+          if (bar) {
+            bar.dataset.width = `${data.alignment.applied}%`;
+          }
+          const labels = document.getElementById("alignment-labels");
+          if (labels)
+            labels.innerHTML = `<div class="pct-label">Applied — ${data.alignment.applied}%</div><div class="pct-label secondary">Theoretical — ${data.alignment.theoretical}%</div>`;
+          const desc = document.getElementById("alignment-desc");
+          if (desc) desc.textContent = data.alignment.description;
+        }
+        // Methods
+        if (data.methods) {
+          const chart = document.getElementById("methods-chart");
+          if (chart) {
+            chart.innerHTML = data.methods
+              .map(
+                (m) => `
+        <div class="bar-row">
+          <span class="bar-label">${m.name}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:0%" data-width="${m.pct}%"></div></div>
+          <span class="bar-value">${m.pct}%</span>
+        </div>`,
+              )
+              .join("");
+          }
+        }
+        // Trending
+        if (data.trending) {
+          const list = document.getElementById("trend-list");
+          if (list) {
+            list.innerHTML = data.trending
+              .map(
+                (t, i) => `
+        <div class="trend-item">
+          <div class="trend-rank">0${i + 1}</div>
+          <div class="trend-info">
+            <div class="trend-name">${t.name}</div>
+            <div class="trend-meta">${t.description}</div>
+          </div>
+          <div class="trend-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        </div>`,
+              )
+              .join("");
+          }
+        }
+        // Cross-disciplinary
+        if (data.cross_disciplinary) {
+          const net = document.getElementById("cross-disciplinary-grid");
+          if (net) {
+            net.innerHTML = data.cross_disciplinary
+              .map(
+                (d) => `
+        <div class="net-group">
+          <div class="net-group-title">${d.department}</div>
+          <div class="net-tags">
+            ${d.tags.map((t) => `<span class="net-tag ${d.highlights.includes(t) ? "highlight" : ""}">${t}</span>`).join("")}
+          </div>
+        </div>`,
+              )
+              .join("");
+          }
+          const insight = document.getElementById("cross-disciplinary-insight");
+          if (insight && data.cross_disciplinary_insight)
+            insight.textContent = data.cross_disciplinary_insight;
+        }
+
+        // Trigger bar animations
+        setTimeout(animateBars, 200);
+      }
+
+      function downloadInsights() {
+        const report = {
+          pipeline: "Lumina NLP Research Pipeline",
+          generated_at: new Date().toISOString(),
+          summaries: state.summaries,
+          sections: state.sections,
+        };
+        const blob = new Blob([JSON.stringify(report, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "research-insights.json";
+        a.click();
+      }
+
+      // ── CLIPBOARD ──
+      function copyToClipboard(text) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => showNotification("Copied to clipboard"));
+      }
+
+      // ── NOTIFICATION ──
+      function showNotification(msg) {
+        const el = document.getElementById("notification");
+        document.getElementById("notification-text").textContent = msg;
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 3000);
+      }
+
+      // ── INIT: animate bars on load if on step 3 ──
+      window.addEventListener("load", () => {
+        document.getElementById("hero-section").style.display = "block";
+      });
+    </script>
+  </body>
+</html>
